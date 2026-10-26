@@ -356,15 +356,6 @@
                     <div id="letter-content"
                         class="letter-paper w-full rounded-2xl p-6 sm:p-8 pt-8 text-center flex flex-col items-center relative z-10">
 
-                        <div class="relative z-20 mb-3 -mt-2">
-                            <div class="sticker-tag px-5 py-1.5 rounded-md text-center inline-block">
-                                <p class="font-handwriting text-xl sm:text-2xl text-gray-800 font-bold"
-                                    id="display-tag">
-                                    Tu cumpleaños y...
-                                </p>
-                            </div>
-                        </div>
-
                         <p class="font-serif italic text-base sm:text-lg text-[#5A4332] leading-relaxed text-center font-medium my-3 whitespace-pre-line"
                             id="display-letter-body"></p>
 
@@ -449,8 +440,7 @@
             date: "28 de Octubre de 2026",
             caption: "Juliana y Jose",
             openPrompt: "PRESIONA PARA ABRIR",
-            tag: "Tu cumpleaños y...",
-            letter: "Hoy celebramos todo lo que hemos vivido, pero, sobre todo, todo lo que aún nos queda por vivir.\n\nPorque si llegar hasta aquí ha sido tan bonito, no puedo imaginar lo increíble que será seguir escribiendo esta historia a tu lado.",
+            letter: "Hoy celebramos tu cumpleaños y todo lo que hemos vivido, pero, sobre todo, todo lo que aún nos queda por vivir.\n\nPorque si llegar hasta aquí ha sido tan bonito, no puedo imaginar lo increíble que será seguir escribiendo esta historia a tu lado.",
             question: "¿Te gustaría seguir escribiendo nuestra historia?",
             buttonText: "Sí, quiero",
             targetUrl: "https://wa.me/qr/CVC2JYIQ63ICK1",
@@ -471,7 +461,7 @@
             ],
 
             // Enlace de la Música (Sombra mp3 directo o enlaces de Dropbox / Catbox)
-            singleSong: "https://files.catbox.moe/g08aq3.mpeg"
+            singleSong: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-112349.mp3"
         };
 
         /* =====================================================================
@@ -511,7 +501,6 @@
             safeSetText('display-date', appData.date);
             safeSetText('display-caption', appData.caption);
             safeSetText('display-open-prompt', appData.openPrompt || "PRESIONA PARA ABRIR");
-            safeSetText('display-tag', appData.tag);
             safeSetText('display-letter-body', appData.letter);
             safeSetText('display-question', appData.question);
             safeSetText('display-button-text', appData.buttonText || "Sí, quiero");
