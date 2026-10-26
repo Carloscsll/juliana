@@ -207,7 +207,7 @@
             animation: pulseGlow 2s infinite ease-in-out;
         }
 
-        /* Indicador de Deslizar Elegante */
+        /* Indicador de Deslizar Elegante y Sutil */
         @keyframes floatSubtle {
 
             0%,
@@ -276,8 +276,8 @@
     </div>
 
     <!-- REPRODUCTOR DE AUDIO UNIVERSAL -->
-    <audio id="bg-music" loop preload="auto">
-        <source id="music-source" src="">
+    <audio id="bg-music" loop preload="auto" playsinline webkit-playsinline>
+        <source id="music-source" src="" type="audio/mpeg">
     </audio>
 
     <!-- BOTÓN MÚSICA FLOTANTE SUPERIOR -->
@@ -488,6 +488,7 @@
         let isPlaying = false;
         let isLetterOpen = false;
         let unlockTapCount = 0;
+        let audioContext = null;
 
         function safeSetText(id, text) {
             const el = document.getElementById(id);
@@ -499,7 +500,7 @@
             if (el) el.src = src || '';
         }
 
-        // Convierte enlaces de Dropbox y Google Drive a URLs directas de transmisión
+        // Convierte enlaces de Dropbox y Google Drive a URLs compatibles con streaming móvil
         function fixMediaUrl(url) {
             if (!url) return '';
             let cleanUrl = url.trim();
@@ -511,11 +512,11 @@
                 cleanUrl = cleanUrl.split('?')[0];
             }
 
-            // Convertir enlaces de Google Drive
+            // Convertir enlaces de Google Drive para reproducción en celulares sin bloqueo
             if (cleanUrl.includes('drive.google.com')) {
                 const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
                 if (match && match[1]) {
-                    cleanUrl = `https://docs.google.com/uc?export=download&id=${match[1]}`;
+                    cleanUrl = `https://docs.google.com/uc?export=open&id=${match[1]}`;
                 }
             }
 
@@ -566,17 +567,18 @@
             }
         }
 
-        function handleUnlockTap(event) {
-            unlockTapCount++;
+        // Despierta el canal de audio de iOS/Android al interactuar
+        function unlockMobileAudio() {
+            if (!audioContext) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    audioContext = new AudioCtx();
+                }
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
 
-            const instruction = document.getElementById('unlock-instruction');
-            const progressBar = document.getElementById('unlock-progress-bar');
-            const percentageText = document.getElementById('unlock-percentage');
-            const unlockScreen = document.getElementById('unlock-screen');
-
-            createHeartParticles(event);
-
-            // Cargar y activar permisos de reproducción en el navegador
             const audio = document.getElementById('bg-music');
             if (audio) {
                 audio.play().then(() => {
@@ -589,6 +591,18 @@
                     }
                 }).catch(() => { });
             }
+        }
+
+        function handleUnlockTap(event) {
+            unlockTapCount++;
+
+            const instruction = document.getElementById('unlock-instruction');
+            const progressBar = document.getElementById('unlock-progress-bar');
+            const percentageText = document.getElementById('unlock-percentage');
+            const unlockScreen = document.getElementById('unlock-screen');
+
+            createHeartParticles(event);
+            unlockMobileAudio();
 
             if (unlockTapCount === 1) {
                 if (instruction) instruction.innerText = "Algo se está encendiendo...";
