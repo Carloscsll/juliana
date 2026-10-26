@@ -158,13 +158,6 @@
             transition: opacity 0.6s ease;
         }
 
-        .sticker-tag {
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #EAE0D5;
-            transform: rotate(-1.5deg);
-        }
-
         .wax-seal {
             background: linear-gradient(135deg, #A83246 0%, #8B263E 100%);
             box-shadow: 0 6px 16px rgba(139, 38, 62, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
@@ -212,6 +205,24 @@
 
         .pulse-heart {
             animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Indicador de Deslizar Elegante y Legible */
+        @keyframes floatSubtle {
+
+            0%,
+            100% {
+                transform: translate(-50%, 0);
+            }
+
+            50% {
+                transform: translate(-50%, 6px);
+            }
+        }
+
+        .scroll-hint-float {
+            animation: floatSubtle 2.2s infinite ease-in-out;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 8px rgba(248, 244, 238, 0.8);
         }
 
         ::-webkit-scrollbar {
@@ -264,9 +275,9 @@
         </div>
     </div>
 
-    <!-- REPRODUCTOR DE AUDIO -->
-    <audio id="bg-music" loop preload="metadata" crossorigin="anonymous">
-        <source id="music-source" src="" type="audio/mpeg">
+    <!-- REPRODUCTOR DE AUDIO UNIVERSAL -->
+    <audio id="bg-music" loop preload="auto">
+        <source id="music-source" src="https://files.catbox.moe/g08aq3.mpeg">
     </audio>
 
     <!-- BOTÓN MÚSICA FLOTANTE SUPERIOR -->
@@ -276,6 +287,13 @@
             title="Música">
             <i id="music-icon" class="fas fa-music text-lg"></i>
         </button>
+    </div>
+
+    <!-- INDICADOR DE DESLIZAR SUTIL Y LEGIBLE -->
+    <div id="scroll-hint"
+        class="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-opacity duration-500 opacity-0 flex flex-col items-center gap-1 text-[#6E543C] font-semibold scroll-hint-float select-none">
+        <span class="font-serif italic text-xs tracking-wider">desliza hacia abajo</span>
+        <i class="fas fa-chevron-down text-xs text-terracotta drop-shadow-sm"></i>
     </div>
 
     <!-- CONTENEDOR PRINCIPAL -->
@@ -431,7 +449,7 @@
     <!-- CÓDIGO JAVASCRIPT -->
     <script>
         /* =====================================================================
-           DATOS PERSONALIZABLES (Modifica estos valores directamente en el código)
+           DATOS PERSONALIZABLES
            ===================================================================== */
         const appData = {
             name: "Juliana y Jose",
@@ -452,7 +470,7 @@
             // Foto Final con Frase Especial
             imgFinal: "https://i.ibb.co/BKdXTZ4V/Whats-App-Image-2026-10-24-at-8-01-01-AM-1.jpg",
 
-            // Galería Intermedia de Fotos (puedes agregar o quitar las que desees)
+            // Galería Intermedia de Fotos
             gallery: [
                 { url: "https://i.ibb.co/psGQ3mS/Whats-App-Image-2026-10-24-at-8-01-01-AM.jpg", caption: "El comienzo de algo hermoso" },
                 { url: "https://i.ibb.co/PsYD8C27/Whats-App-Image-2026-10-24-at-8-01-01-AM-3.jpg", caption: "Risas y aventuras juntas" },
@@ -460,7 +478,7 @@
                 { url: "https://i.ibb.co/Kp2tBztB/Whats-App-Image-2026-10-24-at-8-01-00-AM.jpg", caption: "Construyendo recuerdos" }
             ],
 
-            // Enlace de la Música (Sombra mp3 directo o enlaces de Dropbox / Catbox)
+            // Enlace de la Música
             singleSong: "https://files.catbox.moe/g08aq3.mpeg"
         };
 
@@ -470,7 +488,6 @@
         let isPlaying = false;
         let isLetterOpen = false;
         let unlockTapCount = 0;
-        let currentPlayPromise = null;
 
         function safeSetText(id, text) {
             const el = document.getElementById(id);
@@ -482,7 +499,6 @@
             if (el) el.src = src || '';
         }
 
-        // Convierte enlaces de Dropbox a URLs de audio utilizables en streaming
         function fixMediaUrl(url) {
             if (!url) return '';
             let cleanUrl = url.trim();
@@ -548,15 +564,11 @@
 
             createHeartParticles(event);
 
-            // Cargar audio preventivamente desde la primera interacción
             const audio = document.getElementById('bg-music');
-            const source = document.getElementById('music-source');
-            if (audio && source && appData.singleSong) {
-                const formatted = fixMediaUrl(appData.singleSong);
-                if (source.src !== formatted) {
-                    source.src = formatted;
-                    audio.load();
-                }
+            if (audio) {
+                audio.play().then(() => {
+                    audio.pause();
+                }).catch(() => { });
             }
 
             if (unlockTapCount === 1) {
@@ -573,7 +585,7 @@
                 if (percentageText) percentageText.innerText = "100%";
 
                 triggerConfettiSoft();
-                toggleMusic(true); // Forzar reproducción en el 3er toque
+                playMusicDirect();
 
                 setTimeout(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -582,7 +594,39 @@
                         unlockScreen.style.pointerEvents = 'none';
                         setTimeout(() => { unlockScreen.remove(); }, 700);
                     }
+                    const scrollHint = document.getElementById('scroll-hint');
+                    if (scrollHint) {
+                        scrollHint.classList.remove('opacity-0');
+                        scrollHint.classList.add('opacity-100');
+                    }
                 }, 400);
+            }
+        }
+
+        function playMusicDirect() {
+            const audio = document.getElementById('bg-music');
+            const icon = document.getElementById('music-icon');
+            if (!audio) return;
+
+            audio.play().then(() => {
+                isPlaying = true;
+                if (icon) icon.className = 'fas fa-pause text-lg animate-pulse';
+            }).catch(err => {
+                console.log("Audio error handled:", err);
+            });
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('bg-music');
+            const icon = document.getElementById('music-icon');
+            if (!audio) return;
+
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                if (icon) icon.className = 'fas fa-music text-lg';
+            } else {
+                playMusicDirect();
             }
         }
 
@@ -604,7 +648,7 @@
             }
 
             if (!isPlaying) {
-                toggleMusic(true);
+                playMusicDirect();
             }
 
             triggerConfettiSoft();
@@ -658,53 +702,6 @@
             }
         }
 
-        function toggleMusic(forcePlay = false) {
-            const audio = document.getElementById('bg-music');
-            const source = document.getElementById('music-source');
-            const icon = document.getElementById('music-icon');
-            if (!audio || !source) return;
-
-            const formattedSongUrl = fixMediaUrl(appData.singleSong);
-
-            if (source.src !== formattedSongUrl) {
-                source.src = formattedSongUrl;
-                audio.load();
-            }
-
-            if (isPlaying && !forcePlay) {
-                if (currentPlayPromise !== null) {
-                    currentPlayPromise.then(() => {
-                        audio.pause();
-                        if (icon) icon.className = 'fas fa-music text-lg';
-                        isPlaying = false;
-                    }).catch(() => {
-                        audio.pause();
-                        if (icon) icon.className = 'fas fa-music text-lg';
-                        isPlaying = false;
-                    });
-                } else {
-                    audio.pause();
-                    if (icon) icon.className = 'fas fa-music text-lg';
-                    isPlaying = false;
-                }
-            } else {
-                currentPlayPromise = audio.play();
-
-                if (currentPlayPromise !== undefined) {
-                    currentPlayPromise.then(() => {
-                        if (icon) icon.className = 'fas fa-pause text-lg animate-pulse';
-                        isPlaying = true;
-                        currentPlayPromise = null;
-                    }).catch(err => {
-                        console.log("Audio play caught:", err);
-                        isPlaying = false;
-                        if (icon) icon.className = 'fas fa-music text-lg';
-                        currentPlayPromise = null;
-                    });
-                }
-            }
-        }
-
         function triggerConfettiSoft() {
             if (typeof confetti === 'function') {
                 confetti({
@@ -738,6 +735,14 @@
         window.addEventListener('DOMContentLoaded', function () {
             window.scrollTo(0, 0);
             renderData();
+
+            window.addEventListener('scroll', function () {
+                const scrollHint = document.getElementById('scroll-hint');
+                if (scrollHint && window.scrollY > 40) {
+                    scrollHint.classList.add('opacity-0');
+                    scrollHint.classList.remove('opacity-100');
+                }
+            });
         });
     </script>
 </body>
