@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regalo Especial ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500;1,600&display=swap"
+        rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FDFBF7',
+                        softBeige: '#F5EFE6',
+                        warmSand: '#E8DFD8',
+                        romanticRed: '#8B263E',
+                        terracotta: '#D66838',
+                        terracottaHover: '#C25628',
+                        softPink: '#E8B4B8',
+                        paperBeige: '#F3E5C8'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                        handwriting: ['Caveat', 'cursive'],
+                        cursive: ['Great Vibes', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F8F4EE;
+            background-image: radial-gradient(#E5DCD3 0.75px, transparent 0.75px);
+            background-size: 16px 16px;
+            font-family: 'Montserrat', sans-serif;
+            color: #4A403A;
+            overflow-x: hidden;
+        }
+
+        /* Polaroid Styling */
+        .polaroid {
+            background: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(232, 223, 216, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .polaroid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 3D Envelope Styles */
+        .envelope-wrapper {
+            perspective: 1000px;
+            position: relative;
+            width: 100%;
+        }
+
+        .envelope-container {
+            background-color: #E2D0AB;
+            box-shadow: 0 15px 35px rgba(139, 90, 40, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #D4BF96;
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 55%;
+            background: linear-gradient(180deg, #DBC49B 0%, #D4BF96 100%);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s ease;
+            z-index: 30;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            background:
+                linear-gradient(to top right, #E8D6B3 49.5%, transparent 50%),
+                linear-gradient(to top left, #E8D6B3 49.5%, transparent 50%);
+            background-size: 50.5% 65%;
+            background-position: bottom left, bottom right;
+            background-repeat: no-repeat;
+        }
+
+        .envelope-bottom-fold {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: #EEDDBA;
+            clip-path: polygon(0 100%, 50% 20%, 100% 100%);
+            z-index: 21;
+            pointer-events: none;
+        }
+
+        .letter-paper {
+            background-color: #F1E2C3;
+            background-image:
+                linear-gradient(45deg, rgba(180, 140, 90, 0.06) 25%, transparent 25%, transparent 75%, rgba(180, 140, 90, 0.06) 75%),
+                linear-gradient(-45deg, rgba(180, 140, 90, 0.06) 25%, transparent 25%, transparent 75%, rgba(180, 140, 90, 0.06) 75%);
+            background-size: 100% 100%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #E2D0AB;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), max-height 0.8s ease, opacity 0.5s ease;
+            transform-origin: bottom center;
+        }
+
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 5;
+        }
+
+        .envelope-wrapper.open .letter-paper {
+            transform: translateY(0);
+            z-index: 35;
+        }
+
+        .envelope-wrapper.closed .letter-paper {
+            transform: translateY(40px);
+            opacity: 0;
+            pointer-events: none;
+            max-height: 180px;
+            overflow: hidden;
+        }
+
+        .envelope-wrapper.open .envelope-pocket,
+        .envelope-wrapper.open .envelope-bottom-fold {
+            opacity: 0.3;
+            transition: opacity 0.6s ease;
+        }
+
+        .sticker-tag {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #EAE0D5;
+            transform: rotate(-1.5deg);
+        }
+
+        .wax-seal {
+            background: linear-gradient(135deg, #A83246 0%, #8B263E 100%);
+            box-shadow: 0 6px 16px rgba(139, 38, 62, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            border: 2px solid #6E1C2F;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .wax-seal:hover {
+            transform: scale(1.08) rotate(3deg);
+            box-shadow: 0 8px 22px rgba(139, 38, 62, 0.5);
+        }
+
+        /* Floating Heart Particles */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0.8) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.3) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        .floating-heart {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 1.2s cubic-bezier(0.21, 0.61, 0.35, 1) forwards;
+        }
+
+        /* Pulse Heart Animation */
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 12px rgba(214, 104, 56, 0.6));
+            }
+        }
+
+        .pulse-heart {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8F4EE;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #E8DFD8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen flex flex-col items-center justify-start pb-20 pt-6 px-4 selection:bg-terracotta selection:text-white relative">
+
+    <!-- PANTALLA DE DESBLOQUEO INICIAL INTERACTIVA -->
+    <div id="unlock-screen"
+        class="fixed inset-0 z-50 bg-[#F8F4EE] flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
+        <div class="max-w-xs w-full flex flex-col items-center gap-6">
+
+            <h2 id="unlock-name" class="font-serif italic text-3xl sm:text-4xl text-terracotta font-semibold">
+                Juliana
+            </h2>
+
+            <p id="unlock-instruction" class="font-serif italic text-lg text-gray-600 transition-all duration-300">
+                Toca el corazón
+            </p>
+
+            <div class="relative cursor-pointer my-2 select-none" onclick="handleUnlockTap(event)">
+                <div id="unlock-heart-btn"
+                    class="text-6xl text-terracotta pulse-heart transition-transform active:scale-90 duration-200">
+                    ❤️
+                </div>
+            </div>
+
+            <div class="w-full bg-[#E5DCD3] h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div id="unlock-progress-bar"
+                    class="bg-terracotta h-full rounded-full w-0 transition-all duration-500 ease-out shadow-sm"></div>
+            </div>
+
+            <span id="unlock-percentage" class="text-xs font-serif italic text-gray-400">
+                0%
+            </span>
+
+        </div>
+    </div>
+
+    <!-- REPRODUCTOR DE AUDIO -->
+    <audio id="bg-music" loop preload="metadata" crossorigin="anonymous">
+        <source id="music-source" src="" type="audio/mpeg">
+    </audio>
+
+    <!-- BOTÓN MÚSICA FLOTANTE SUPERIOR -->
+    <div class="fixed top-4 right-4 z-40 flex items-center gap-2">
+        <button id="toggle-music-btn" onclick="toggleMusic()"
+            class="bg-white/90 backdrop-blur-md border border-warmSand p-3 rounded-full shadow-md text-terracotta hover:bg-white transition-all flex items-center justify-center w-11 h-11"
+            title="Música">
+            <i id="music-icon" class="fas fa-music text-lg"></i>
+        </button>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="w-full max-w-md mx-auto flex flex-col items-center gap-6">
+
+        <!-- ENCABEZADO -->
+        <header class="text-center w-full pt-2 relative">
+            <p class="font-serif italic text-lg text-gray-500 mb-1" id="display-subtitle">de mi persona favorita</p>
+
+            <div class="flex items-center justify-center gap-3">
+                <h1 class="font-serif text-3xl sm:text-4xl font-semibold tracking-wide text-gray-800" id="display-name">
+                    Juliana y Jose
+                </h1>
+
+                <div class="relative cursor-pointer select-none inline-block" onclick="createHeartParticles(event)">
+                    <span id="header-heart"
+                        class="text-3xl text-terracotta inline-block pulse-heart hover:scale-125 transition-transform">
+                        ❤️
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-3 inline-block bg-white/80 border border-warmSand px-4 py-1 rounded-full shadow-sm">
+                <p class="text-xs font-medium tracking-widest text-gray-600 uppercase" id="display-date">18 de Junio</p>
+            </div>
+        </header>
+
+        <!-- FOTO POLAROID DE PORTADA -->
+        <section class="w-full px-2">
+            <div class="polaroid p-4 rounded-xl relative bg-white">
+                <div class="w-full aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 shadow-inner">
+                    <img id="img-cover" src="" class="w-full h-full object-cover" alt="Foto de Portada" />
+                </div>
+
+                <div class="mt-4 flex items-center justify-between w-full text-warmSand px-2 pt-1">
+                    <span class="text-xs">✳</span>
+                    <span class="font-handwriting text-2xl text-gray-700 italic" id="display-caption">Juliana y
+                        Jose</span>
+                    <span class="text-xs">✳</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- DIVISOR DE ONDA -->
+        <div class="my-1 flex items-center justify-center">
+            <svg width="70" height="14" viewBox="0 0 70 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 7C18 7 18 2 35 2C52 2 52 12 68 12" stroke="#D1C4B5" stroke-width="2"
+                    stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <!-- SECCIÓN SOBRE Y CARTA ROMÁNTICA -->
+        <section class="w-full px-2 relative flex flex-col items-center">
+
+            <div id="envelope-wrapper" class="envelope-wrapper closed w-full">
+
+                <div
+                    class="envelope-container w-full min-h-[320px] flex flex-col items-center justify-center p-4 relative">
+
+                    <div class="envelope-flap"></div>
+                    <div class="envelope-pocket"></div>
+                    <div class="envelope-bottom-fold"></div>
+
+                    <div id="closed-seal-btn"
+                        class="absolute z-40 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300"
+                        onclick="openLetter()">
+                        <div
+                            class="wax-seal px-6 py-3.5 rounded-full flex items-center justify-center gap-2 text-white font-serif italic text-base sm:text-lg tracking-wide font-medium">
+                            <i class="fas fa-envelope-open-text text-sm animate-bounce"></i>
+                            <span id="display-open-prompt">PRESIONA PARA ABRIR</span>
+                        </div>
+                        <p
+                            class="font-serif italic text-xs text-[#6E543C] font-semibold bg-white/80 px-3 py-1 rounded-full shadow-sm">
+                            Hay algo especial dentro para ti ✨
+                        </p>
+                    </div>
+
+                    <div id="letter-content"
+                        class="letter-paper w-full rounded-2xl p-6 sm:p-8 pt-8 text-center flex flex-col items-center relative z-10">
+
+                        <div class="relative z-20 mb-3 -mt-2">
+                            <div class="sticker-tag px-5 py-1.5 rounded-md text-center inline-block">
+                                <p class="font-handwriting text-xl sm:text-2xl text-gray-800 font-bold"
+                                    id="display-tag">
+                                    Tu cumpleaños y...
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="font-serif italic text-base sm:text-lg text-[#5A4332] leading-relaxed text-center font-medium my-3 whitespace-pre-line"
+                            id="display-letter-body"></p>
+
+                        <div class="my-4 space-y-1">
+                            <h3 class="font-serif italic text-lg sm:text-xl text-[#4A3525] font-semibold"
+                                id="display-question">
+                            </h3>
+                        </div>
+
+                        <button onclick="closeLetter()"
+                            class="text-xs font-serif italic text-amber-800/60 hover:text-amber-900 underline pt-2 cursor-pointer">
+                            Guardar carta en el sobre
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- DIVISOR DE ONDA -->
+        <div class="my-2 flex items-center justify-center">
+            <svg width="70" height="14" viewBox="0 0 70 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 7C18 7 18 12 35 12C52 12 52 2 68 2" stroke="#D1C4B5" stroke-width="2"
+                    stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <!-- GALERÍA DE FOTOS -->
+        <section class="w-full px-2 flex flex-col gap-6 my-2">
+
+            <div class="text-center space-y-1 mb-1">
+                <p class="font-serif italic text-gray-500 text-sm">Momentos inolvidables</p>
+                <h3 class="font-serif text-xl font-semibold text-gray-800">Nuestra Historia en Fotos</h3>
+            </div>
+
+            <!-- Contenedor Dinámico -->
+            <div id="dynamic-gallery-container" class="flex flex-col gap-6 w-full"></div>
+
+            <!-- Foto Final con Frase Especial -->
+            <div class="polaroid p-4 rounded-xl bg-white text-center">
+                <div class="w-full aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 shadow-inner mb-3">
+                    <img id="img-post-final" src="" class="w-full h-full object-cover" alt="Foto Final" />
+                </div>
+
+                <div class="space-y-1 pt-1">
+                    <i class="fas fa-camera text-warmSand text-lg mb-1"></i>
+                    <h2 class="font-serif italic text-lg sm:text-xl text-gray-800 px-2 font-medium leading-snug"
+                        id="display-final-quote">
+                    </h2>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- BOTÓN FINAL -->
+        <section class="w-full px-2 mt-4 text-center flex flex-col items-center gap-3">
+            <button onclick="redirectToTargetUrl()"
+                class="w-full max-w-xs bg-terracotta hover:bg-terracottaHover text-white font-serif italic text-xl sm:text-2xl py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 group">
+                <span id="display-button-text">Sí, quiero</span>
+                <span class="text-white text-lg group-hover:animate-ping">♥</span>
+            </button>
+        </section>
+
+        <!-- PIE DE PÁGINA -->
+        <footer class="text-center text-xs text-gray-400 font-sans pb-6 pt-4">
+            <p>Hecho con ❤️ especialmente para ti</p>
+        </footer>
+
+    </main>
+
+    <!-- CÓDIGO JAVASCRIPT -->
+    <script>
+        /* =====================================================================
+           DATOS PERSONALIZABLES (Modifica estos valores directamente en el código)
+           ===================================================================== */
+        const appData = {
+            name: "Juliana y Jose",
+            unlockName: "De Juliana para Jose",
+            subtitle: "de mi persona favorita",
+            date: "28 de Octubre de 2026",
+            caption: "Juliana y Jose",
+            openPrompt: "PRESIONA PARA ABRIR",
+            tag: "Tu cumpleaños y...",
+            letter: "Hoy celebramos todo lo que hemos vivido, pero, sobre todo, todo lo que aún nos queda por vivir.\n\nPorque si llegar hasta aquí ha sido tan bonito, no puedo imaginar lo increíble que será seguir escribiendo esta historia a tu lado.",
+            question: "¿Te gustaría seguir escribiendo nuestra historia?",
+            buttonText: "Sí, quiero",
+            targetUrl: "https://wa.me/qr/CVC2JYIQ63ICK1",
+            finalQuote: "“Gracias por compartir tu vida conmigo”",
+
+            // Foto de Portada
+            imgCover: "https://i.ibb.co/fzJPs13z/Whats-App-Image-2026-10-24-at-8-01-00-AM.jpg",
+
+            // Foto Final con Frase Especial
+            imgFinal: "https://i.ibb.co/BKdXTZ4V/Whats-App-Image-2026-10-24-at-8-01-01-AM-1.jpg",
+
+            // Galería Intermedia de Fotos (puedes agregar o quitar las que desees)
+            gallery: [
+                { url: "https://i.ibb.co/psGQ3mS/Whats-App-Image-2026-10-24-at-8-01-01-AM.jpg", caption: "El comienzo de algo hermoso" },
+                { url: "https://i.ibb.co/PsYD8C27/Whats-App-Image-2026-10-24-at-8-01-01-AM-3.jpg", caption: "Risas y aventuras juntas" },
+                { url: "https://i.ibb.co/7dM2gFxH/Whats-App-Image-2026-10-24-at-8-01-01-AM-2.jpg", caption: "Cada instante a tu lado" },
+                { url: "https://i.ibb.co/Kp2tBztB/Whats-App-Image-2026-10-24-at-8-01-00-AM.jpg", caption: "Construyendo recuerdos" }
+            ],
+
+            // Enlace de la Música (Sombra mp3 directo o enlaces de Dropbox / Catbox)
+            singleSong: "https://files.catbox.moe/g08aq3.mpeg"
+        };
+
+        /* =====================================================================
+           LÓGICA DEL SISTEMA Y ANIMACIONES
+           ===================================================================== */
+        let isPlaying = false;
+        let isLetterOpen = false;
+        let unlockTapCount = 0;
+        let currentPlayPromise = null;
+
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text || '';
+        }
+
+        function safeSetSrc(id, src) {
+            const el = document.getElementById(id);
+            if (el) el.src = src || '';
+        }
+
+        // Convierte enlaces de Dropbox a URLs de audio utilizables en streaming
+        function fixMediaUrl(url) {
+            if (!url) return '';
+            let cleanUrl = url.trim();
+            if (cleanUrl.includes('dropbox.com')) {
+                cleanUrl = cleanUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+                cleanUrl = cleanUrl.replace('dropbox.com', 'dl.dropboxusercontent.com');
+                cleanUrl = cleanUrl.split('?')[0];
+            }
+            return cleanUrl;
+        }
+
+        function renderData() {
+            safeSetText('display-name', appData.name);
+            safeSetText('unlock-name', appData.unlockName || appData.name);
+            safeSetText('display-subtitle', appData.subtitle);
+            safeSetText('display-date', appData.date);
+            safeSetText('display-caption', appData.caption);
+            safeSetText('display-open-prompt', appData.openPrompt || "PRESIONA PARA ABRIR");
+            safeSetText('display-tag', appData.tag);
+            safeSetText('display-letter-body', appData.letter);
+            safeSetText('display-question', appData.question);
+            safeSetText('display-button-text', appData.buttonText || "Sí, quiero");
+            safeSetText('display-final-quote', appData.finalQuote);
+
+            safeSetSrc('img-cover', appData.imgCover);
+            safeSetSrc('img-post-final', appData.imgFinal);
+
+            const container = document.getElementById('dynamic-gallery-container');
+            if (container) {
+                container.innerHTML = '';
+                appData.gallery.forEach((photo, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'polaroid p-4 rounded-xl bg-white';
+                    card.innerHTML = `
+                        <div class="w-full aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 shadow-inner">
+                            <img src="${photo.url}" class="w-full h-full object-cover" alt="Foto ${index + 1}" />
+                        </div>
+                        ${photo.caption ? `<div class="mt-3 text-center"><p class="font-handwriting text-2xl text-gray-700 italic">${photo.caption}</p></div>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            if (appData.singleSong) {
+                const audio = document.getElementById('bg-music');
+                const source = document.getElementById('music-source');
+                if (audio && source) {
+                    const formattedSongUrl = fixMediaUrl(appData.singleSong);
+                    if (source.src !== formattedSongUrl) {
+                        source.src = formattedSongUrl;
+                        audio.load();
+                    }
+                }
+            }
+        }
+
+        function handleUnlockTap(event) {
+            unlockTapCount++;
+
+            const instruction = document.getElementById('unlock-instruction');
+            const progressBar = document.getElementById('unlock-progress-bar');
+            const percentageText = document.getElementById('unlock-percentage');
+            const unlockScreen = document.getElementById('unlock-screen');
+
+            createHeartParticles(event);
+
+            // Cargar audio preventivamente desde la primera interacción
+            const audio = document.getElementById('bg-music');
+            const source = document.getElementById('music-source');
+            if (audio && source && appData.singleSong) {
+                const formatted = fixMediaUrl(appData.singleSong);
+                if (source.src !== formatted) {
+                    source.src = formatted;
+                    audio.load();
+                }
+            }
+
+            if (unlockTapCount === 1) {
+                if (instruction) instruction.innerText = "Algo se está encendiendo...";
+                if (progressBar) progressBar.style.width = "33%";
+                if (percentageText) percentageText.innerText = "33%";
+            } else if (unlockTapCount === 2) {
+                if (instruction) instruction.innerText = "¡Una vez más! Casi listo...";
+                if (progressBar) progressBar.style.width = "66%";
+                if (percentageText) percentageText.innerText = "66%";
+            } else if (unlockTapCount >= 3) {
+                if (instruction) instruction.innerText = "¡Listo! ❤️";
+                if (progressBar) progressBar.style.width = "100%";
+                if (percentageText) percentageText.innerText = "100%";
+
+                triggerConfettiSoft();
+                toggleMusic(true); // Forzar reproducción en el 3er toque
+
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (unlockScreen) {
+                        unlockScreen.style.opacity = '0';
+                        unlockScreen.style.pointerEvents = 'none';
+                        setTimeout(() => { unlockScreen.remove(); }, 700);
+                    }
+                }, 400);
+            }
+        }
+
+        function openLetter() {
+            if (isLetterOpen) return;
+            isLetterOpen = true;
+
+            const wrapper = document.getElementById('envelope-wrapper');
+            const sealBtn = document.getElementById('closed-seal-btn');
+
+            if (sealBtn) {
+                sealBtn.style.opacity = '0';
+                sealBtn.style.pointerEvents = 'none';
+            }
+
+            if (wrapper) {
+                wrapper.classList.remove('closed');
+                wrapper.classList.add('open');
+            }
+
+            if (!isPlaying) {
+                toggleMusic(true);
+            }
+
+            triggerConfettiSoft();
+        }
+
+        function closeLetter() {
+            isLetterOpen = false;
+            const wrapper = document.getElementById('envelope-wrapper');
+            const sealBtn = document.getElementById('closed-seal-btn');
+
+            if (wrapper) {
+                wrapper.classList.remove('open');
+                wrapper.classList.add('closed');
+            }
+
+            setTimeout(() => {
+                if (sealBtn) {
+                    sealBtn.style.opacity = '1';
+                    sealBtn.style.pointerEvents = 'auto';
+                }
+            }, 400);
+        }
+
+        function redirectToTargetUrl() {
+            triggerConfettiMassive();
+            setTimeout(() => {
+                const url = appData.targetUrl || "https://wa.me/qr/CVC2JYIQ63ICK1";
+                window.open(url, "_blank");
+            }, 400);
+        }
+
+        function createHeartParticles(event) {
+            const container = event.currentTarget;
+            if (!container) return;
+            const rect = container.getBoundingClientRect();
+
+            for (let i = 0; i < 6; i++) {
+                const heart = document.createElement('span');
+                heart.innerHTML = '❤️';
+                heart.className = 'floating-heart text-sm';
+
+                const offsetX = (Math.random() - 0.5) * 40;
+                heart.style.left = `${rect.width / 2 + offsetX}px`;
+                heart.style.top = `0px`;
+
+                container.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 1200);
+            }
+        }
+
+        function toggleMusic(forcePlay = false) {
+            const audio = document.getElementById('bg-music');
+            const source = document.getElementById('music-source');
+            const icon = document.getElementById('music-icon');
+            if (!audio || !source) return;
+
+            const formattedSongUrl = fixMediaUrl(appData.singleSong);
+
+            if (source.src !== formattedSongUrl) {
+                source.src = formattedSongUrl;
+                audio.load();
+            }
+
+            if (isPlaying && !forcePlay) {
+                if (currentPlayPromise !== null) {
+                    currentPlayPromise.then(() => {
+                        audio.pause();
+                        if (icon) icon.className = 'fas fa-music text-lg';
+                        isPlaying = false;
+                    }).catch(() => {
+                        audio.pause();
+                        if (icon) icon.className = 'fas fa-music text-lg';
+                        isPlaying = false;
+                    });
+                } else {
+                    audio.pause();
+                    if (icon) icon.className = 'fas fa-music text-lg';
+                    isPlaying = false;
+                }
+            } else {
+                currentPlayPromise = audio.play();
+
+                if (currentPlayPromise !== undefined) {
+                    currentPlayPromise.then(() => {
+                        if (icon) icon.className = 'fas fa-pause text-lg animate-pulse';
+                        isPlaying = true;
+                        currentPlayPromise = null;
+                    }).catch(err => {
+                        console.log("Audio play caught:", err);
+                        isPlaying = false;
+                        if (icon) icon.className = 'fas fa-music text-lg';
+                        currentPlayPromise = null;
+                    });
+                }
+            }
+        }
+
+        function triggerConfettiSoft() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.65 },
+                    colors: ['#D66838', '#E8B4B8', '#F5EFE6']
+                });
+            }
+        }
+
+        function triggerConfettiMassive() {
+            if (typeof confetti === 'function') {
+                const count = 200;
+                const defaults = { origin: { y: 0.8 } };
+
+                function fire(particleRatio, opts) {
+                    confetti(Object.assign({}, defaults, opts, {
+                        particleCount: Math.floor(count * particleRatio)
+                    }));
+                }
+
+                fire(0.25, { spread: 26, startVelocity: 55, colors: ['#D66838', '#E8B4B8'] });
+                fire(0.2, { spread: 60, colors: ['#ffffff', '#8B263E'] });
+                fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#F5EFE6'] });
+                fire(0.1, { spread: 120, startVelocity: 45 });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            window.scrollTo(0, 0);
+            renderData();
+        });
+    </script>
+</body>
+
+</html>
