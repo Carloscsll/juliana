@@ -207,7 +207,7 @@
             animation: pulseGlow 2s infinite ease-in-out;
         }
 
-        /* Indicador de Deslizar Elegante y Legible */
+        /* Indicador de Deslizar Elegante */
         @keyframes floatSubtle {
 
             0%,
@@ -277,7 +277,7 @@
 
     <!-- REPRODUCTOR DE AUDIO UNIVERSAL -->
     <audio id="bg-music" loop preload="auto">
-        <source id="music-source" src="https://files.catbox.moe/g08aq3.mpeg">
+        <source id="music-source" src="">
     </audio>
 
     <!-- BOTÓN MÚSICA FLOTANTE SUPERIOR -->
@@ -449,7 +449,7 @@
     <!-- CÓDIGO JAVASCRIPT -->
     <script>
         /* =====================================================================
-           DATOS PERSONALIZABLES
+           DATOS PERSONALIZABLES (Modifica estos valores directamente en el código)
            ===================================================================== */
         const appData = {
             name: "Juliana y Jose",
@@ -478,7 +478,7 @@
                 { url: "https://i.ibb.co/Kp2tBztB/Whats-App-Image-2026-10-24-at-8-01-00-AM.jpg", caption: "Construyendo recuerdos" }
             ],
 
-            // Enlace de la Música
+            // Enlace de Música (Soporta Catbox, Dropbox y Google Drive)
             singleSong: "https://files.catbox.moe/g08aq3.mpeg"
         };
 
@@ -499,14 +499,26 @@
             if (el) el.src = src || '';
         }
 
+        // Convierte enlaces de Dropbox y Google Drive a URLs directas de transmisión
         function fixMediaUrl(url) {
             if (!url) return '';
             let cleanUrl = url.trim();
+
+            // Convertir enlaces de Dropbox
             if (cleanUrl.includes('dropbox.com')) {
                 cleanUrl = cleanUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
                 cleanUrl = cleanUrl.replace('dropbox.com', 'dl.dropboxusercontent.com');
                 cleanUrl = cleanUrl.split('?')[0];
             }
+
+            // Convertir enlaces de Google Drive
+            if (cleanUrl.includes('drive.google.com')) {
+                const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    cleanUrl = `https://docs.google.com/uc?export=download&id=${match[1]}`;
+                }
+            }
+
             return cleanUrl;
         }
 
@@ -564,10 +576,17 @@
 
             createHeartParticles(event);
 
+            // Cargar y activar permisos de reproducción en el navegador
             const audio = document.getElementById('bg-music');
             if (audio) {
                 audio.play().then(() => {
-                    audio.pause();
+                    if (unlockTapCount < 3) {
+                        audio.pause();
+                    } else {
+                        isPlaying = true;
+                        const icon = document.getElementById('music-icon');
+                        if (icon) icon.className = 'fas fa-pause text-lg animate-pulse';
+                    }
                 }).catch(() => { });
             }
 
@@ -585,7 +604,6 @@
                 if (percentageText) percentageText.innerText = "100%";
 
                 triggerConfettiSoft();
-                playMusicDirect();
 
                 setTimeout(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -612,7 +630,7 @@
                 isPlaying = true;
                 if (icon) icon.className = 'fas fa-pause text-lg animate-pulse';
             }).catch(err => {
-                console.log("Audio error handled:", err);
+                console.log("Audio error:", err);
             });
         }
 
